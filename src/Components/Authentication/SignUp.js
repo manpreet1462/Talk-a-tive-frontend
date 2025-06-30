@@ -2,10 +2,10 @@ import { Button } from "@chakra-ui/button";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
 import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
 import { VStack } from "@chakra-ui/layout";
-import { useToast } from "@chakra-ui/toast";
-import axios from "axios";
+import { useToast } from "@chakra-ui/react";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
+import API from "../../Api";
 
 const Signup = () => {
   const [show, setShow] = useState(false);
@@ -16,23 +16,24 @@ const Signup = () => {
   const [name, setName] = useState();
   const [email, setEmail] = useState();
   const [confirmpassword, setConfirmpassword] = useState();
-  const [password, setPassword] = useState(); 
+  const [password, setPassword] = useState();
   const [pic, setPic] = useState();
-  const [picLoading, setPicLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const submitHandler = async () => {
-    setPicLoading(true);
+    setLoading(true);
     if (!name || !email || !password || !confirmpassword) {
       toast({
-        title: "Please Fill all the Feilds",
+        title: "Please Fill all the Fields",
         status: "warning",
         duration: 5000,
         isClosable: true,
         position: "bottom",
       });
-      setPicLoading(false);
+      setLoading(false);
       return;
     }
+
     if (password !== confirmpassword) {
       toast({
         title: "Passwords Do Not Match",
@@ -41,16 +42,18 @@ const Signup = () => {
         isClosable: true,
         position: "bottom",
       });
+      setLoading(false);
       return;
     }
-    console.log(name, email, password, pic);
+
     try {
       const config = {
         headers: {
           "Content-type": "application/json",
         },
       };
-      const { data } = await axios.post(
+
+      const { data } = await API.post(
         "/api/user",
         {
           name,
@@ -60,7 +63,7 @@ const Signup = () => {
         },
         config
       );
-      console.log(data);
+
       toast({
         title: "Registration Successful",
         status: "success",
@@ -68,25 +71,26 @@ const Signup = () => {
         isClosable: true,
         position: "bottom",
       });
+
       localStorage.setItem("userInfo", JSON.stringify(data));
-      setPicLoading(false);
+      setLoading(false);
       history.push("/chats");
     } catch (error) {
       toast({
-        title: "Error Occured!",
-        description: error.response.data.message,
+        title: "Error Occurred!",
+        description: error.response?.data?.message || error.message,
         status: "error",
         duration: 5000,
         isClosable: true,
         position: "bottom",
       });
-      setPicLoading(false);
+      setLoading(false);
     }
   };
 
   const postDetails = (pics) => {
-    setPicLoading(true);
-    if (pics === undefined) {
+    setLoading(true);
+    if (!pics) {
       toast({
         title: "Please Select an Image!",
         status: "warning",
@@ -94,6 +98,7 @@ const Signup = () => {
         isClosable: true,
         position: "bottom",
       });
+      setLoading(false);
       return;
     }
 
@@ -102,6 +107,7 @@ const Signup = () => {
       data.append("file", pics);
       data.append("upload_preset", "TALK-A-TIVE");
       data.append("cloud_name", "ddjb3ecc2");
+
       fetch("https://api.cloudinary.com/v1_1/ddjb3ecc2/image/upload", {
         method: "post",
         body: data,
@@ -109,23 +115,28 @@ const Signup = () => {
         .then((res) => res.json())
         .then((data) => {
           setPic(data.url.toString());
-          console.log(data.url.toString());
-          setPicLoading(false);
+          setLoading(false);
         })
         .catch((err) => {
-          console.log(err);
-          setPicLoading(false);
+          console.error(err);
+          toast({
+            title: "Image Upload Failed",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom",
+          });
+          setLoading(false);
         });
     } else {
       toast({
-        title: "Please Select an Image!",
+        title: "Please Select a JPEG or PNG Image!",
         status: "warning",
         duration: 5000,
         isClosable: true,
         position: "bottom",
       });
-      setPicLoading(false);
-      return;
+      setLoading(false);
     }
   };
 
@@ -161,7 +172,7 @@ const Signup = () => {
           </InputRightElement>
         </InputGroup>
       </FormControl>
-      <FormControl id="password" isRequired>
+      <FormControl id="confirmpassword" isRequired>
         <FormLabel>Confirm Password</FormLabel>
         <InputGroup size="md">
           <Input
@@ -190,7 +201,7 @@ const Signup = () => {
         width="100%"
         style={{ marginTop: 15 }}
         onClick={submitHandler}
-        isLoading={picLoading}
+        isLoading={loading}
       >
         Sign Up
       </Button>

@@ -1,13 +1,13 @@
 import { AddIcon } from "@chakra-ui/icons";
 import { Box, Stack, Text } from "@chakra-ui/layout";
-import { useToast } from "@chakra-ui/toast";
-import axios from "axios";
+import { useToast } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { getSender } from "../config/ChatLogics";
 import ChatLoading from "./ChatLoading";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
 import { Button } from "@chakra-ui/react";
 import { ChatState } from "../Context/ChatProvider";
+import API from "../Api"; // ✅ Replaced axios with custom API instance
 
 const MyChats = ({ fetchAgain }) => {
   const [loggedUser, setLoggedUser] = useState();
@@ -16,8 +16,7 @@ const MyChats = ({ fetchAgain }) => {
 
   const toast = useToast();
 
-  const fetchChats = async () => {   
-    // console.log(user._id);
+  const fetchChats = async () => {
     try {
       const config = {
         headers: {
@@ -25,16 +24,16 @@ const MyChats = ({ fetchAgain }) => {
         },
       };
 
-      const { data } = await axios.get("/api/chat", config);
+      const { data } = await API.get("/api/chat", config);
       setChats(data);
     } catch (error) {
       toast({
-        title: "Error Occured!",
-        description: "Failed to Load the chats",
+        title: "Error Occurred!",
+        description: "Failed to load the chats",
         status: "error",
         duration: 5000,
         isClosable: true,
-        position: "bottom-left",
+        position: "bottom",
       });
     }
   };
@@ -42,6 +41,7 @@ const MyChats = ({ fetchAgain }) => {
   useEffect(() => {
     setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
     fetchChats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchAgain]);
 
   return (
@@ -76,6 +76,7 @@ const MyChats = ({ fetchAgain }) => {
           </Button>
         </GroupChatModal>
       </Box>
+
       <Box
         display="flex"
         flexDir="column"
