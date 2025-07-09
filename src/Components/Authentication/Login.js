@@ -1,29 +1,25 @@
-import { Button } from "@chakra-ui/react";
-import { FormControl, FormLabel } from "@chakra-ui/react";
-import { Input, InputGroup, InputRightElement } from "@chakra-ui/react";
-import { VStack } from "@chakra-ui/react";
+import { Button, FormControl, FormLabel, Input, InputGroup, InputRightElement, VStack, useToast } from "@chakra-ui/react";
 import { useState } from "react";
-import { useToast } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 import API from "../../Api";
-// import { ChatState } from "../../Context/ChatProvider";
+import { ChatState } from "../../Context/ChatProvider"; // ✅ make sure this is correct
 
 const Login = () => {
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
   const toast = useToast();
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const history = useHistory();
-//   const { setUser } = ChatState();
+  const { setUser } = ChatState(); // ✅ make sure this is correctly set in your Context
 
   const submitHandler = async () => {
     setLoading(true);
     if (!email || !password) {
       toast({
-        title: "Please Fill all the Feilds",
+        title: "Please Fill all the Fields",
         status: "warning",
         duration: 5000,
         isClosable: true,
@@ -40,11 +36,7 @@ const Login = () => {
         },
       };
 
-      const { data } = await API.post(
-        "/api/user/login",
-        { email, password },
-        config
-      );
+      const { data } = await API.post("/api/user/login", { email, password }, config);
 
       toast({
         title: "Login Successful",
@@ -53,14 +45,15 @@ const Login = () => {
         isClosable: true,
         position: "bottom",
       });
-    //   setUser(data);
+
+      setUser(data); // ✅ Set in context
       localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
       history.push("/chats");
     } catch (error) {
       toast({
-        title: "Error Occured!",
-        description: error.response.data.message,
+        title: "Error Occurred!",
+        description: error.response?.data?.message || "Login failed",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -100,7 +93,7 @@ const Login = () => {
       <Button
         colorScheme="blue"
         width="100%"
-        style={{ marginTop: 15 }}
+        mt={4}
         onClick={submitHandler}
         isLoading={loading}
       >
