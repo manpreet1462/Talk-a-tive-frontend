@@ -12,7 +12,8 @@ const Chatpage = () => {
   const history = useHistory();
 
   useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+
 
     if (!userInfo) {
       history.push("/"); // Redirect to login

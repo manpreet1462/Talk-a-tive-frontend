@@ -47,7 +47,8 @@ const Login = () => {
       });
 
       setUser(data); // ✅ Set in context
-      localStorage.setItem("userInfo", JSON.stringify(data));
+      sessionStorage.setItem("userInfo", JSON.stringify(data));
+
       setLoading(false);
       history.push("/chats");
     } catch (error) {
